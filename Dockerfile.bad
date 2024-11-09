@@ -1,0 +1,20 @@
+FROM apache/airflow:latest
+
+USER root
+RUN apt-get update
+RUN apt-get install -y vim
+RUN apt-get install -y curl
+RUN apt-get install -y wget
+
+COPY . /opt/airflow/
+
+# мы не хотели писать USER airflow, а сделать все под рутом,
+# но базовый контейнер airflow сам ругается и не дает забилдить контейнер
+USER airflow
+RUN pip install numpy
+
+RUN airflow db init
+
+ENV API_KEY="mysecretapikey"
+
+CMD ["airflow", "webserver"]
