@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # PostgreSQL для хранения данных Airflow
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" 
+
+  # Redis как брокер для очередей Airflow
+  redis:
+    image: redis:latest
+    container_name: redis_broker
+    ports:
+      - "6379:6379" # порт для доступа к Redis
+
+  # Apache Airflow
+  airflow:
+    image: apache/airflow:2.6.3
+    container_name: airflow_server
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__WEBSERVER__RBAC: "True"
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
+      AIRFLOW_UID: "50000"  # UID для пользователя Airflow
+    volumes:
+      - ./dags:/opt/airflow/dags  # папка с DAG файлами
+      - ./logs:/opt/airflow/logs  # папка с логами
+      - ./plugins:/opt/airflow/plugins  # папка с плагинами
+    ports:
+      - "8080:8080"  # порт веб-интерфейса Airflow
+    command: >
+      bash -c "airflow db upgrade &&
+               airflow users create -u admin -p admin -r Admin -e admin@example.com -f Admin -l User &&
+               airflow webserver & airflow scheduler"
+    restart: always
+
+volumes:
+  postgres_data: # том для постоянного хранения данных PostgreSQL
+  airflow_logs: # том для хранения логов Airflow
+  airflow_plugins: # том для хранения плагинов Airflow
