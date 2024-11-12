@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL для хранения данных Airflow
   postgres:
     image: postgres:13
     environment:
@@ -13,7 +12,6 @@ services:
     ports:
       - "5432:5432"
 
-  # Инициализатор базы данных Airflow
   airflow-init:
     build:
       context: .
@@ -25,11 +23,9 @@ services:
     depends_on:
       - postgres
     command: >
-      bash -c "airflow db upgrade &&
-               airflow users create -u ${AIRFLOW_ADMIN_USER} -p ${AIRFLOW_ADMIN_PASSWORD} -r Admin -e admin@example.com -f Admin -l User || 
-               echo 'Admin user already exists'"
+      airflow db upgrade &&
+      airflow users create -u ${AIRFLOW_ADMIN_USER} -p ${AIRFLOW_ADMIN_PASSWORD} -r Admin -e ${AIRFLOW_ADMIN_EMAIL} -f Admin -l User 
 
-  # Airflow Webserver
   airflow-webserver:
     build:
       context: .
@@ -48,7 +44,6 @@ services:
       - ./plugins:/opt/airflow/plugins
     command: ["airflow", "webserver"]
 
-  # Airflow Scheduler
   airflow-scheduler:
     build:
       context: .
@@ -70,3 +65,6 @@ volumes:
   postgres_data:
   airflow_logs:
   airflow_plugins:
+
+
+
