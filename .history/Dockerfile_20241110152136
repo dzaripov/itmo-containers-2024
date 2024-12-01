@@ -1,0 +1,29 @@
+FROM apache/airflow:slim-2.10.3-python3.11 as builder
+
+USER root
+RUN apt-get update && apt-get install -y \
+    vim \
+    curl \
+    wget \
+    && apt-get clean
+
+USER airflow
+
+COPY requirements.txt /opt/airflow/requirements.txt
+
+RUN pip install --no-cache-dir -r /opt/airflow/requirements.txt
+
+FROM builder as initializer
+
+# Выполняем команду инициализации базы данных Airflow
+ENTRYPOINT ["airflow", "db", "upgrade"]
+# Можно также добавить команду для создания пользователя-администратора:
+# RUN airflow users create -u admin -p admin -r Admin -e admin@example.com -f Admin -l User
+
+# Stage 3: Финальный образ для запуска `airflow-webserver`
+FROM builder as production
+
+# Указываем, что это конечный контейнер
+USER airflow
+
+ENTRYPOINT ["airflow", "webserver"]

@@ -1,0 +1,18 @@
+FROM apache/airflow:slim-2.10.3-python3.11
+
+USER root
+RUN apt-get update && apt-get install -y \
+    vim \
+    curl \
+    wget \
+    && apt-get clean
+
+USER airflow
+
+COPY requirements.txt /opt/airflow/requirements.txt
+
+RUN pip install --no-cache-dir -r /opt/airflow/requirements.txt
+
+HEALTHCHECK CMD curl --fail http://localhost:8080/health || exit 1
+
+RUN airflow db init

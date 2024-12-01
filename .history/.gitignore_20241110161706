@@ -121,7 +121,7 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-# Environments
+# Environment
 .venv
 env/
 venv/
@@ -152,12 +152,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-
-.history/
-
-logs/
-plugins/
-
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
