@@ -5,7 +5,7 @@
 ![image](https://github.com/user-attachments/assets/bb6d9fbb-5eb4-47b8-8313-6ddabb476f21)
 3. Проверяем, что они все объекты создались, с помощью команды kubectl get
 ![image](https://github.com/user-attachments/assets/b85bbcb4-433d-4a74-8d9e-e0b664cdc8d1)
-4. Образаемся к созданному Deployment через kubectl describe
+4. Обращаемся к созданному Deployment через kubectl describe
  ![image](https://github.com/user-attachments/assets/4f834a12-f17a-48fa-b681-a828384bf46c)
 5. После создания из манифеста некстклауда сущностей Secret и Deployment, смотрим, что содержимое секретов реально не показывается.
  ![image](https://github.com/user-attachments/assets/e7ba0009-482c-43fc-b3f1-aba6bd342b34)
