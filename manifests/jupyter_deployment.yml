@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter-notebook-deployment
+  labels:
+    app: jupyter-notebook
+    part: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyter-notebook
+  template:
+    metadata:
+      labels:
+        app: jupyter-notebook
+        part: frontend
+    spec:
+      containers:
+      - name: jupyter-notebook
+        image: my_jupyter_notebook
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8888
+        env:
+        - name: JUPYTER_ENABLE_LAB
+          valueFrom:
+            configMapKeyRef:
+              name: jupyter-postgres-config
+              key: JUPYTER_ENABLE_LAB
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-service:5432/$(POSTGRES_DB)"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_DB
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8888
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 8
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command: ['sh', '-c', 'for i in {1..30}; do nc -z postgres-service 5432 && echo \
+        "Initialization complete: PostgreSQL database is operational." && exit 0; echo waiting for postgres; \
+        sleep 5; done; echo "PostgreSQL did not start in time!"; exit 1']

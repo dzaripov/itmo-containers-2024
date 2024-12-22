@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jupyter-postgres-config
+  labels:
+    app: jupyter-notebook
+    part: frontend
+data:
+  JUPYTER_ENABLE_LAB: "yes"
