@@ -14,38 +14,38 @@ spec:
       labels:
         app: airflow
     spec:
-      # initContainers:
-      # - name: airflow-init
-      #   image: apache/airflow:slim-2.10.3-python3.11
-      #   imagePullPolicy: IfNotPresent
-      #   envFrom:
-      #   - configMapRef:
-      #       name: postgres-configmap
-      #   - secretRef:
-      #       name: postgres-secret
-      #   - configMapRef:
-      #       name: airflow-configmap
-      #   command: ["/bin/bash", "-c"]
-      #   args:
-      #     - >
-      #       airflow db upgrade &&
-      #       airflow users create
-      #       --username "$AIRFLOW_ADMIN_USER"
-      #       --password "$AIRFLOW_ADMIN_PASSWORD"
-      #       --role Admin
-      #       --email "$AIRFLOW_ADMIN_EMAIL"
-      #       --firstname Admin
-      #       --lastname User
+      initContainers:
+      - name: airflow-init
+        image: apache/airflow:slim-2.10.3-python3.11
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: postgres-configmap
+        - secretRef:
+            name: postgres-secret
+        - configMapRef:
+            name: airflow-configmap
+        command: ["/bin/bash", "-c"]
+        args:
+          - >
+            airflow db upgrade &&
+            airflow users create
+            --username "$AIRFLOW_ADMIN_USER"
+            --password "$AIRFLOW_ADMIN_PASSWORD"
+            --role Admin
+            --email "$AIRFLOW_ADMIN_EMAIL"
+            --firstname Admin
+            --lastname User
       containers:
       - name: airflow
         image: apache/airflow:slim-2.10.3-python3.11
-        # resources:
-        #   limits:
-        #     cpu: 500m
-        #     memory: 512Mi
-        #   requests:
-        #     cpu: 250m
-        #     memory: 512Mi
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
         ports:
         - name: http
           containerPort: 8080
@@ -60,23 +60,17 @@ spec:
         imagePullPolicy: IfNotPresent
         # readinessProbe:
         #   httpGet:
-        #     path: /
-        #     port: 8080
-        #   initialDelaySeconds: 30
-        #   periodSeconds: 60
-        # livenessProbe:
-        #   httpGet:
-        #     path: /
-        #     port: 8080
-        #   initialDelaySeconds: 30
-        #   periodSeconds: 60
-        # readinessProbe:
-        #   httpGet:
         #     path: /health
         #     port: 8080
         #   initialDelaySeconds: 10
         #   periodSeconds: 5
         #   timeoutSeconds: 3
         #   failureThreshold: 1
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 8080
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 60
       restartPolicy: Always
       dnsPolicy: ClusterFirst
